@@ -29,8 +29,9 @@ public:
     explicit PreTreat(QWidget *parent = 0);
     ~PreTreat();
 
+   void showPicture(Ui::PreTreat*PT,QString filename);//这里也需要形参
 
-
+    //QImage *image;
     int globalMark;
     QImage globalImg;
 /**/
@@ -60,6 +61,7 @@ private slots:
 
 private:
     Ui::PreTreat *ui;
+
 };
 
 #endif // PRETREAT_H

@@ -23,6 +23,14 @@ HObject ho_Highpass, ho_ImageMean,ho_ImageMedian;
 HTuple hv_Width, hv_Height, hv_WindowHandle=0, widid2;
 long widid;
 
+QString savePath;
+QString saveName;
+QString fileName;
+QString middleSavePath="/home/lsj/workspace/qt/pretreat_demo1/pictures/middle_pictures";
+//暂时手动设置中间图片存储路径。。。坑死了，必须要加/home才是绝对路径
+QString middlePictureName="mp";
+int middlePictureId;
+
 PreTreat::PreTreat(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::PreTreat)
@@ -34,38 +42,43 @@ PreTreat::PreTreat(QWidget *parent) :
 PreTreat::~PreTreat()
 {
     delete ui;
+   // delete image;
 }
 
-void QWidget::closeEvent(QCloseEvent *event)
+void PreTreat::showPicture(Ui::PreTreat*PT,QString filename) //在graphicsView里显示图像
 {
-    if(hv_WindowHandle!=0)
+    QImage *image;
+
+    image = new QImage();
+    int width,height;
+
+    if(image->load(filename))//直接通过文件名获取图片
     {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
+        width=image->width();
+        height=image->height();
+                QGraphicsScene *scene = new QGraphicsScene;
+                scene->addPixmap(QPixmap::fromImage(*image));
+                PT->graphicsView->setScene(scene);
+               // PT->graphicsView->resize(width + 10, height + 10);
+                PT->graphicsView->show();
     }
-    QApplication *app;
-    app->exit(0);
 }
 
 void PreTreat::on_OpenImageButton_clicked()  //打开图像文件
 {
     ui->label->clear();
-    QString fileName = QFileDialog::getOpenFileName(this,tr("open image file"), "./", tr("Image files(*.jpg *.png);;All files (*.*)"));
-                                                        //窗口文字               默认目录       筛选后缀
+    fileName = QFileDialog::getOpenFileName(this,tr("open image file"), "./", tr("Image files(*.jpg *.png);;All files (*.*)"));
+                                                        //窗口文字         默认目录       筛选后缀
     widid=this->winId();
     widid2=widid;
     ReadImage(&ho_Image, HTuple(fileName.toStdString().c_str()));
-  //  OpenWindow(ui->graphicsView->x(),ui->graphicsView->y(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
 
-    OpenWindow(0,0,ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-    {
-        DispObj(ho_Image,HDevWindowStack::GetActive());
-        ui->label->setText(fileName);
-        globalMark=1;
-    }
+    showPicture(ui,fileName);
+    ui->label->setText(fileName);
+
+    //globalMark部分待添加
+    globalMark=1;
+    middlePictureId=1;
 }
 
 void PreTreat::on_SaveImageButton_clicked()//保存图像文件
@@ -74,10 +87,10 @@ void PreTreat::on_SaveImageButton_clicked()//保存图像文件
     {
          QString filePath;
          QDateTime time=QDateTime::currentDateTime();
-         QString saveName=time.toString("yyyyMMdd_hhmmss");
+         saveName=time.toString("yyyyMMdd_hhmmss");
          filePath=QDir::homePath();//QFileDialog::getExistingDirectory(this,"");
 
-         QString savePath=QString("%1/%2.jpg").arg(filePath).arg(saveName);
+         savePath=QString("%1/%2.jpg").arg(filePath).arg(saveName);
          ui->label->setText(savePath);
          WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
     }
@@ -89,170 +102,123 @@ void PreTreat::on_SaveImageButton_clicked()//保存图像文件
 
 void PreTreat::on_LaplaceButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     Laplace(ho_Image, &ho_ImageLaplace, "absolute", 3, "n_4");
     ho_Image=ho_ImageLaplace;
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+    fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+    savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+    WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+    showPicture(ui,savePath);//图片名字前得带上路径
+    middlePictureId++;
+
 }
 
 void PreTreat::on_pushButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
-  //  Laplace(ho_Image, &ho_ImageLaplace, "absolute", 3, "n_4");
     InvertImage(ho_Image, &ho_ImageInvert);  //反色处理
     ho_Image=ho_ImageInvert;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+    fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+    savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+    WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+    showPicture(ui,savePath);//图片名字前得带上路径
+    middlePictureId++;
 }
 
 void PreTreat::on_SobelButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     SobelAmp(ho_Image, &ho_EdgeAmplitude, "sum_abs", 3); //sobel处理
     ho_Image=ho_EdgeAmplitude;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+    fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+    savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+    WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+    showPicture(ui,savePath);//图片名字前得带上路径
+    middlePictureId++;
 }
 
 void PreTreat::on_SmoothButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
    SmoothImage(ho_Image, &ho_ImageSmooth, "gauss", 5);//平滑
     ho_Image=ho_ImageSmooth;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+    fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+    savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+    WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+    showPicture(ui,savePath);//图片名字前得带上路径
+    middlePictureId++;
 }
 
 void PreTreat::on_ErosionButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     GenDiscSe(&ho_SE, "byte", 8, 8, 0);
      GrayErosion(ho_Image, ho_SE, &ho_ImageErosion);//腐蚀
      ho_Image=ho_ImageErosion;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+     fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+     savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+     WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+     showPicture(ui,savePath);//图片名字前得带上路径
+     middlePictureId++;
 }
 
 
 void PreTreat::on_DilationButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     GenDiscSe(&ho_SE, "byte", 8, 8, 0);
      GrayDilation(ho_Image, ho_SE, &ho_ImageDilation);//腐蚀
      ho_Image=ho_ImageDilation;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+     fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+     savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+     WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+     showPicture(ui,savePath);//图片名字前得带上路径
+     middlePictureId++;
 }
 
 void PreTreat::on_HighpassButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     GenDiscSe(&ho_SE, "byte", 8, 8, 0);
      HighpassImage(ho_Image, &ho_Highpass, 19, 19);
      ho_Image=ho_Highpass;                //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+     fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+     savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+     WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+     showPicture(ui,savePath);//图片名字前得带上路径
+     middlePictureId++;
 }
 
 void PreTreat::on_LowpassButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     GenDiscSe(&ho_SE, "byte", 8, 8, 0);
       MeanImage(ho_Image, &ho_ImageMean, 19, 19);
     ho_Image=  ho_ImageMean;              //传递
 
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+    fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+    savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+    WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+    showPicture(ui,savePath);//图片名字前得带上路径
+    middlePictureId++;
 }
 
 void PreTreat::on_MedianpassButton_clicked()
 {
-    widid=this->winId();
-    widid2=widid;
+
     GenDiscSe(&ho_SE, "byte", 8, 8, 0);
   MedianImage(ho_Image, &ho_ImageMedian, "circle", 3, "continued");
      ho_Image=  ho_ImageMedian;              //传递
-    if(hv_WindowHandle!=0)
-    {
-        HDevWindowStack::Pop();
-        CloseWindow(hv_WindowHandle);
-        hv_WindowHandle=0;
-    }
-    OpenWindow(ui->graphicsView->y(),ui->graphicsView->x(),ui->graphicsView->width(),ui->graphicsView->height(),widid2,"","",&hv_WindowHandle);
-    HDevWindowStack::Push(hv_WindowHandle);
-    if(HDevWindowStack::IsOpen())
-        DispObj(ho_Image,HDevWindowStack::GetActive());
+
+     fileName=QString("%1_%2").arg(middlePictureName).arg(middlePictureId);
+     savePath=QString("%1/%2.jpg").arg(middleSavePath).arg(fileName);
+     WriteImage(ho_Image, "jpeg", 0, HTuple(savePath.toStdString().c_str()));
+     showPicture(ui,savePath);//图片名字前得带上路径
+     middlePictureId++;
 }
