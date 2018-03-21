@@ -8,6 +8,10 @@
 #include "HalconCpp.h"
 #include "HDevThread.h"
 
+#include "thesholdinputdialog.h"
+#include "ui_thesholdinputdialog.h"
+
+
 #include <QTime>
 #include <QDir>
 #include <QFile>
@@ -29,8 +33,9 @@ public:
     explicit PreTreat(QWidget *parent = 0);
     ~PreTreat();
 
+   void showPicture(Ui::PreTreat*PT,QString filename);//这里也需要形参
 
-
+    //QImage *image;
     int globalMark;
     QImage globalImg;
 /**/
@@ -58,8 +63,12 @@ private slots:
 
     void on_MedianpassButton_clicked();
 
+    void on_thresholdButton_clicked();
+
 private:
     Ui::PreTreat *ui;
+    ThesholdInputDialog *tidialog;
+
 };
 
 #endif // PRETREAT_H

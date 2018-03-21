@@ -25,13 +25,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        pretreat.cpp
+        pretreat.cpp \
+    thesholdinputdialog.cpp
 
 HEADERS += \
-        pretreat.h
+        pretreat.h \
+    thesholdinputdialog.h
 
 FORMS += \
-        pretreat.ui
+        pretreat.ui \
+    thesholdinputdialog.ui
 
 #includes
 INCLUDEPATH += /opt/halcon/include
