@@ -10,7 +10,22 @@
 
 #include "thesholdinputdialog.h"
 #include "ui_thesholdinputdialog.h"
-
+#include "scaleinputdialog.h"
+#include "ui_scaleinputdialog.h"
+#include "decomposedialog.h"
+#include "ui_decomposedialog.h"
+#include "geometrictransdialog.h"
+#include "ui_geometrictransdialog.h"
+#include "affinetransdialog.h"
+#include "ui_affinetransdialog.h"
+#include "comparedialog.h"
+#include "ui_comparedialog.h"
+#include "emphasizedialog.h"
+#include "ui_emphasizedialog.h"
+#include "scalemaxdialog.h"
+#include "ui_scalemaxdialog.h"
+#include "illuminatedialog.h"
+#include "ui_illuminatedialog.h"
 
 #include <QTime>
 #include <QDir>
@@ -65,10 +80,34 @@ private slots:
 
     void on_thresholdButton_clicked();
 
+    void on_ScaleButton_clicked();
+
+
+    void on_DecomposeButton_clicked();
+
+    void on_GeoTransButton_clicked();
+
+    void on_affineTranspushButton_clicked();
+
+    void on_CompareButton_clicked();
+
+    void on_EmphasizeButton_clicked();
+
+    void on_scale_max_pushButton_clicked();
+
+    void on_illuminatepushButton_clicked();
+
 private:
     Ui::PreTreat *ui;
     ThesholdInputDialog *tidialog;
-
+    ScaleInputDialog *sidialog;
+    DecomposeDialog *dcDialog;
+    GeometricTransDialog *gtdialog;
+    AffineTransDialog *aftdialog;
+    CompareDialog *cpdialog;
+    EmphasizeDialog *epdialog;
+    ScaleMaxDialog *smdialog;
+    IlluminateDialog *ildialog;
 };
 
 #endif // PRETREAT_H

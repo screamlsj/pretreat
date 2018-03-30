@@ -26,15 +26,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         pretreat.cpp \
-    thesholdinputdialog.cpp
+    thesholdinputdialog.cpp \
+    scaleinputdialog.cpp \
+    decomposedialog.cpp \
+    geometrictransdialog.cpp \
+    affinetransdialog.cpp \
+    comparedialog.cpp \
+    emphasizedialog.cpp \
+    scalemaxdialog.cpp \
+    illuminatedialog.cpp
 
 HEADERS += \
         pretreat.h \
-    thesholdinputdialog.h
+    thesholdinputdialog.h \
+    scaleinputdialog.h \
+    decomposedialog.h \
+    geometrictransdialog.h \
+    affinetransdialog.h \
+    comparedialog.h \
+    emphasizedialog.h \
+    scalemaxdialog.h \
+    illuminatedialog.h
 
 FORMS += \
         pretreat.ui \
-    thesholdinputdialog.ui
+    thesholdinputdialog.ui \
+    scaleinputdialog.ui \
+    decomposedialog.ui \
+    geometrictransdialog.ui \
+    affinetransdialog.ui \
+    comparedialog.ui \
+    emphasizedialog.ui \
+    scalemaxdialog.ui \
+    illuminatedialog.ui
 
 #includes
 INCLUDEPATH += /opt/halcon/include
